@@ -1,5 +1,5 @@
 {
-    "name": "create-litium-accelerator",
+    "name": "@hayodev/create-litium-accelerator",
     "author": "Hayo",
     "version": "0.0.9",
     "main": "index.js",
@@ -14,9 +14,19 @@
         "type": "git",
         "url": "git+https://github.com/HayoDev/create-litium-accelerator.git"
     },
-    "bin": "./index.js",
+    "bin": {
+        "create-litium-accelerator": "index.js"
+    },
     "scripts": {
         "build": "node index.js",
         "release": "standard-version && git push --follow-tags && npm publish --registry https://registry.npmjs.org/"
-    }
+    },
+    "description": "litium boilerplate",
+    "keywords": [
+        "litium"
+    ],
+    "bugs": {
+        "url": "https://github.com/HayoDev/create-litium-accelerator/issues"
+    },
+    "homepage": "https://github.com/HayoDev/create-litium-accelerator#readme"
 }
