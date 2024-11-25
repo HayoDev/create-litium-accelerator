@@ -86,6 +86,8 @@ function getSqlServerDockerContainer() {
       }
     } else {
       warn('No active Docker containers with "sqlserver" in the name were found.');
+      err('Please start your docker and make sure you have sqlserver container running');
+      process.exit(1);
     }
   } catch (error) {
     warn('Docker command failed. Ensure Docker is installed and running.');

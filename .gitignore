@@ -10,8 +10,6 @@ lerna-debug.log*
 # deps
 node_modules
 
-# macOS
-DS_Store
 
 # Editor directories and files
 .vscode/*
