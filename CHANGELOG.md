@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.2](https://github.com/HayoDev/create-litium-accelerator/compare/v1.2.0...v0.0.2) (2024-11-25)
+
+
+### Features
+
+* correct registry :pencil: ([f19ec9e](https://github.com/HayoDev/create-litium-accelerator/commit/f19ec9e528fa3c93e2a25e9f18052ab3fbd7eb0d))
+
 ## [1.2.0](https://github.com/HayoDev/create-litium-accelerator/compare/v1.1.2...v1.2.0) (2024-11-25)
 
 
