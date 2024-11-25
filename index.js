@@ -17,34 +17,32 @@ const ttyGrey = (text) => `${ttyMkBold(30)}${text}${ttyEscape(0)}`;
 const ttyBold = (text) => `${ttyMkBold(39)}${text}${ttyEscape(0)}`;
 
 // Constants
-const nodeVersion = '20'; // Not prompted, as per request
+const nodeVersion = '20';
 const currentDir = process.cwd();
-
-let sqlServerDocker = getSqlServerDockerContainer();
+const dependencies = ['dotnet'];
+const platform = process.platform;
+const isWindows = platform === 'win32';
+const sqlServerDocker = getSqlServerDockerContainer();
+const now = new Date();
 
 // Variables with defaults. We will prompt the user for these:
-let projectPath = './LitiumTutorial';
-let projectName = 'LitiumTutorial';
-let databaseName = 'LitiumTutorial';
+let projectPath = './LitiumAccelerator';
+let projectName = 'LitiumAccelerator';
+let databaseName = `Litium-${new Intl.DateTimeFormat('sv-SE', { dateStyle: 'short'}).format(now)}`;
 let sqlServer = 'localhost';
 let sqlServerPort = sqlServerDocker.hostPort;
 let sqlServerUsername = 'sa';
 let sqlServerPassword = 'Pass@word';
-let applicationUrl = 'litiumtutorial.localtest.me';
-let applicationPort = '6000';
-let applicationPortHttps = '6001';
+let applicationUrl = `${projectName.toLowerCase()}.localtest.me`;
+let applicationPort = isWindows ? '5000' : '6000';
+let applicationPortHttps = isWindows ? '5001' : '6001';
 let litiumUserName = 'admin';
 let litiumPassword = 'nimda';
 let sqlServerDockerName = sqlServerDocker.name;
 let sqlServerDockerContainerPort = sqlServerDocker.containerPort;
-let projectType = 'headless'; // Default to headless
+let projectType;
 let projectDirToRun;
 
-const dependencies = ['dotnet'];
-
-// Determine platform-specific values
-const platform = process.platform;
-const isWindows = platform === 'win32';
 let litiumStorefrontToolPath = path.join(process.env.HOME || process.env.USERPROFILE, '.dotnet', 'tools', 'litium-storefront');
 
 if (isWindows) {
@@ -52,6 +50,27 @@ if (isWindows) {
 }
 
 // Functions
+
+
+function pro(message) {
+  console.log(`${ttyBlue('==>')} ${ttyBold(message)}`);
+}
+
+function inf(message) {
+  console.log(`${ttyGrey('===>')} ${ttyBold(message)}`);
+}
+
+function ok(message) {
+  console.log(`${ttyGreen('OK')} ${message}`);
+}
+
+function warn(message) {
+  console.log(`${ttyYellow('WARN')} ${message}`);
+}
+
+function err(message) {
+  console.error(`${ttyRed('ERROR')} ${message}`);
+}
 
 /**
  * @typedef {Object} DockerContainer
@@ -128,56 +147,50 @@ function getSqlCmdPath(containerName) {
   throw new Error('sqlcmd not found in any known paths');
 }
 
+function checkDatabaseExists(database) {
+  const sqlCmdPath = getSqlCmdPath(sqlServerDockerName);
+  const sqlQuery = `SET NOCOUNT ON; SELECT name FROM sys.databases WHERE name = N'${database}';`;
+  const command = `docker exec ${sqlServerDockerName} "${sqlCmdPath}" -S ${sqlServer},${sqlServerDockerContainerPort} -U ${sqlServerUsername} -P ${sqlServerPassword} -Q "${sqlQuery}" -h -1 -W`;
+  try {
+    const result = execSync(command, { encoding: 'utf8', shell: true }).trim();
+    return result === database;
+  } catch (error) {
+    return false;
+  }
+}
+
 // Function to clear the existing project directory
-function clearExistingProjectDirectory() {
+async function clearExistingProjectDirectory() {
   if (fs.existsSync(projectPath)) {
     const absoluteProjectPath = path.resolve(currentDir, projectPath);
-
-    console.log(`Folder "${absoluteProjectPath}" already exists.`);
-
-    // Prompt the user for confirmation
-    const rl = readline.createInterface({
-      input: process.stdin,
-      output: process.stdout,
-    });
-
-    return new Promise((resolve) => {
-      rl.question(
-        `Do you want to replace it? This will delete all contents in the folder! (Y/n): `,
-        (answer) => {
-          rl.close();
-          const response = answer.trim().toLowerCase();
-
-          if (response !== 'n') {
-            // Delete the folder
-            try {
-              fs.rmSync(absoluteProjectPath, { recursive: true, force: true });
-              ok(`Cleared existing folder: ${absoluteProjectPath}`);
-              resolve();
-            } catch (error) {
-              err(`Failed to delete folder: ${absoluteProjectPath}`);
-              err(error.message);
-              process.exit(1);
-            }
-          } else {
-            console.log('Operation canceled by user.');
-            process.exit(0);
-          }
-        }
-      );
-    });
+    inf(`Folder "${absoluteProjectPath}" already exists.`);
+    const shouldDelete = await askConfirmation('Do you want to replace it? This will delete all contents in the folder?');
+    if(shouldDelete) {
+      try {
+        fs.rmSync(absoluteProjectPath, { recursive: true, force: true });
+        ok(`Cleared existing folder: ${absoluteProjectPath}`);
+        return true;
+      } catch (error) {
+        err(`Failed to delete folder: ${absoluteProjectPath}`);
+        err(error.message);
+        process.exit(1);
+      }
+    } else {
+      inf('Operation canceled by user.');
+      process.exit(0);
+    }
   }
-  return Promise.resolve(); // If the folder does not exist, continue
+  return Promise.resolve();
 }
 
 function checkDependencies(deps) {
   for (const dep of deps) {
     try {
       commandExists.sync(dep);
-      console.log(`✅ ${dep} is installed`);
+      pro(`✅ ${dep} is installed`);
     } catch {
-      console.error(`❌ ${dep} is not installed or not in PATH`);
-      console.error('One or more required dependencies are missing. Aborting.');
+      err(`❌ ${dep} is not installed or not in PATH`);
+      err('One or more required dependencies are missing. Aborting.');
       process.exit(1);
     }
   }
@@ -186,33 +199,12 @@ function checkDependencies(deps) {
 }
 
 function cleanup() {
-  console.log('Cleaning up processes...');
-  // Kill all child processes if needed
+  pro('Cleaning up processes...');
   process.exit(1);
 }
+
 process.on('SIGINT', cleanup);
 process.on('SIGTERM', cleanup);
-
-
-function pro(message) {
-  console.log(`${ttyBlue('==>')} ${ttyBold(message)}`);
-}
-
-function inf(message) {
-  console.log(`${ttyGrey('===>')} ${ttyBold(message)}`);
-}
-
-function ok(message) {
-  console.log(`${ttyGreen('OK')} ${message}`);
-}
-
-function warn(message) {
-  console.log(`${ttyYellow('WARN')} ${message}`);
-}
-
-function err(message) {
-  console.error(`${ttyRed('ERROR')} ${message}`);
-}
 
 function runCommand(command, args = [], cwd = null, options = {}) {
   pro(`Running command: ${command} ${args.join(' ')} in ${cwd || 'current directory'}`);
@@ -235,24 +227,6 @@ function runCommand(command, args = [], cwd = null, options = {}) {
   }
 }
 
-function runCommandOutput(command, args = [], cwd = null, options = {}) {
-  try {
-    const result = spawnSync(command, args, {
-      stdio: 'pipe',
-      cwd,
-      shell: isWindows,
-      encoding: 'utf8',
-      ...options,
-    });
-    if (result.error) {
-      throw result.error;
-    }
-    return result.stdout.toString().trim();
-  } catch (error) {
-    return null;
-  }
-}
-
 function checkNodeVersion(expectedVersion) {
   const currentVersion = process.version.replace('v', '');
   if (!currentVersion.startsWith(expectedVersion)) {
@@ -262,7 +236,7 @@ function checkNodeVersion(expectedVersion) {
 }
 
 async function waitForSQLConnection() {
-  warn('Waiting for connection to the SQL server (in Docker container)...');
+  pro('Waiting for connection to the SQL server (in Docker container)...');
   let sqlConnected = false;
   let sqlAttempts = 0;
   const maxSqlAttempts = 60;
@@ -318,8 +292,8 @@ async function waitForServerReady() {
 
     if (!serverReady) {
       serverAttempts++;
-      console.log(`Waiting 1 second before next attempt (${serverAttempts}/${maxServerAttempts})...`);
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      pro(`Waiting 3 seconds before next attempt (${serverAttempts}/${maxServerAttempts})...`)
+      await new Promise((resolve) => setTimeout(resolve, 3000));
     }
   }
 
@@ -346,9 +320,9 @@ function askQuestion(query, defaultValue) {
 }
 
 // Function to prompt user for selection
-async function askSelection(question, options, defaultValue) {
+async function askSelection(question, options, defaultValue = null) {
   const optionList = options.map((option, index) => `  ${index + 1}) ${option}`).join('\n');
-  const prompt = `${question}\n${optionList}\nPlease enter the number of your choice (${defaultValue}): `;
+  const prompt = `${question}\n${optionList}\nPlease enter the number of your choice: `;
 
   const rl = readline.createInterface({
     input: process.stdin,
@@ -358,7 +332,7 @@ async function askSelection(question, options, defaultValue) {
   return new Promise((resolve) => {
     rl.question(prompt, (answer) => {
       rl.close();
-      const choice = answer.trim() || defaultValue;
+      const choice = answer.trim();
       const selectedIndex = parseInt(choice, 10) - 1;
       if (selectedIndex >= 0 && selectedIndex < options.length) {
         resolve(options[selectedIndex]);
@@ -369,6 +343,34 @@ async function askSelection(question, options, defaultValue) {
     });
   });
 }
+
+const askConfirmation = async (text) => {
+  const rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout,
+  });
+
+  return new Promise((resolve) => {
+    const prompt = () => {
+      rl.question(text, (answer) => {
+        const trimmedAnswer = answer.trim().toLowerCase();
+        console.log(trimmedAnswer);
+        if (trimmedAnswer === 'y') {
+          rl.close();
+          resolve(true);
+        } else if (trimmedAnswer === 'n') {
+          rl.close();
+          resolve(false);
+        } else {
+          console.log('Please enter "y" or "n"');
+          // Repeat the prompt without closing rl
+          prompt();
+        }
+      });
+    };
+    prompt();
+  });
+};
 
 // Function to display summary and confirm installation
 async function displaySummaryAndConfirm() {
@@ -388,38 +390,34 @@ async function displaySummaryAndConfirm() {
 
   Do you want to proceed with the installation? (Y/n): `;
 
-  const rl = readline.createInterface({
-    input: process.stdin,
-    output: process.stdout,
-  });
-
-  const askConfirmation = async () => {
-    return new Promise((resolve) => {
-      rl.question(summaryText, (answer) => {
-        const trimmedAnswer = answer.trim().toLowerCase();
-
-        if (!trimmedAnswer || trimmedAnswer === 'y') {
-          rl.close();
-          resolve('y');
-        } else if (trimmedAnswer === 'n') {
-          rl.close();
-          resolve('n');
-        } else {
-          console.log('Please enter "y" or "n"');
-          resolve(askConfirmation()); // Recursively ask again
-        }
-      });
-    });
-  };
-
-  return askConfirmation();
+  return await askConfirmation(summaryText);
 }
 
 // Function to prompt for variable values
 async function promptVariables() {
   projectPath = await askQuestion('Enter project path', projectPath);
   projectName = await askQuestion('Enter project name', projectName);
+  sqlServerDockerName = await askQuestion(`Enter SQL Server Docker container name`, sqlServerDockerName);
+  sqlServerDockerContainerPort = await askQuestion('Enter port for Docker SQL instance', sqlServerDockerContainerPort);
   databaseName = await askQuestion('Enter database name', databaseName);
+ 
+  let tempDb = databaseName;
+  let dbExists = await checkDatabaseExists(tempDb);
+
+  while (dbExists) {
+    if (dbExists) {
+      const overwrite = await askConfirmation(`Database ${tempDb} already exists. Do you want to overwrite it? (Y/n): `);
+      if (overwrite) {
+        databaseName = tempDb;
+        dbExists = false;
+      } else {
+        tempDb = await askQuestion('Enter another name for the database', tempDb);
+        dbExists = await checkDatabaseExists(tempDb);
+        databaseName = tempDb;
+      }
+    }
+  }
+
   sqlServer = await askQuestion('Enter SQL Server address', sqlServer);
   sqlServerPort = await askQuestion('Enter SQL Server port', sqlServerPort);
   sqlServerUsername = await askQuestion('Enter SQL Server username', sqlServerUsername);
@@ -429,12 +427,10 @@ async function promptVariables() {
   applicationPortHttps = await askQuestion('Enter secure application port (Https)', applicationPortHttps);
   litiumUserName = await askQuestion('Enter Litium username', litiumUserName);
   litiumPassword = await askQuestion('Enter Litium password', litiumPassword);
-  sqlServerDockerName = await askQuestion(`Enter SQL Server Docker container name`, sqlServerDockerName);
-  sqlServerDockerContainerPort = await askQuestion('Enter port for Docker SQL instance', sqlServerDockerContainerPort);
 
   // Ask for project type selection
   const options = ['MVC', 'Headless'];
-  projectType = await askSelection('Select project type to set up:', options, '2');
+  projectType = await askSelection('Select project type to set up:', options);
   projectType = projectType.toLowerCase();
 }
 
@@ -637,11 +633,8 @@ NODE_TLS_REJECT_UNAUTHORIZED="0"
 
   // Display summary of configurations and ask for confirmation
   const confirmResponse = await displaySummaryAndConfirm();
-  if (confirmResponse === 'n') {
+  if (!confirmResponse) {
     console.log('Installation cancelled by user.');
-    process.exit(0);
-  } else if (confirmResponse !== 'y') {
-    console.log('Invalid response. Installation cancelled.');
     process.exit(0);
   }
 
@@ -702,11 +695,24 @@ NODE_TLS_REJECT_UNAUTHORIZED="0"
 
   inf(`Creating database ${databaseName}...`);
   try {
-    const sqlQuery = `IF NOT EXISTS(SELECT * FROM sys.databases WHERE name = N'${databaseName}') CREATE DATABASE [${databaseName}];`;
 
-    const command = `docker exec ${sqlServerDockerName} "${sqlCmdPath}" -S ${sqlServer},${sqlServerDockerContainerPort} -U ${sqlServerUsername} -P ${sqlServerPassword} -Q "${sqlQuery}" -C`;
+    if (checkDatabaseExists(databaseName)) {
+      // Drop the existing database
+      inf('Drop the existing database');
+      const dropQuery = `USE master; ALTER DATABASE [${databaseName}] SET SINGLE_USER WITH ROLLBACK IMMEDIATE; DROP DATABASE [${databaseName}];`;
+      const dropCommand = `docker exec ${sqlServerDockerName} "${sqlCmdPath}" -S ${sqlServer},${sqlServerDockerContainerPort} -U ${sqlServerUsername} -P ${sqlServerPassword} -Q "${dropQuery}" -C`;
+      execSync(dropCommand, { stdio: 'inherit', shell: true });
+      inf(`Database ${databaseName} has been dropped.`);
+    }
 
-    execSync(command, { stdio: 'inherit', shell: true });
+    inf(`Creating database ${databaseName}}`);
+
+    // Create the new database
+    const createQuery = `CREATE DATABASE [${databaseName}];`;
+    const createCommand = `docker exec ${sqlServerDockerName} "${sqlCmdPath}" -S ${sqlServer},${sqlServerDockerContainerPort} -U ${sqlServerUsername} -P ${sqlServerPassword} -Q "${createQuery}" -C`;
+    execSync(createCommand, { stdio: 'inherit', shell: true });
+
+    inf(`Database ${databaseName} has been created.`);
   } catch (error) {
     console.error('Error creating database:', error.message);
   }
@@ -740,7 +746,7 @@ NODE_TLS_REJECT_UNAUTHORIZED="0"
   );
 
   // Start .NET server
-  warn('Starting .NET server...');
+  inf('Starting .NET server...');
 
   const dotnetProcess = spawn('dotnet', ['run'], { cwd: projectDirToRun, stdio: 'inherit', shell: isWindows });
 
