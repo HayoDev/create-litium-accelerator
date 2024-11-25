@@ -8,8 +8,7 @@
         "standard-version": "^9.5.0"
     },
     "dependencies": {
-        "command-exists": "^1.2.9",
-        "cross-env": "^7.0.3"
+        "command-exists": "^1.2.9"
     },
     "repository": {
         "type": "git",
@@ -17,7 +16,7 @@
     },
     "bin": "./index.js",
     "scripts": {
-        "build": "cross-env NODE_TLS_REJECT_UNAUTHORIZED=0 node index.js",
+        "build": "node index.js",
         "release": "standard-version && git push --follow-tags && npm publish --registry https://registry.npmjs.org/"
     }
 }
