@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.3](https://github.com/HayoDev/create-litium-accelerator/compare/v0.0.2...v0.0.3) (2024-11-25)
+
+
+### Bug Fixes
+
+* name of pkg ([4be03dc](https://github.com/HayoDev/create-litium-accelerator/commit/4be03dcd4aa8353dc2bcf449a7c7bd8c6d10aaae))
+
 ### [0.0.2](https://github.com/HayoDev/create-litium-accelerator/compare/v1.2.0...v0.0.2) (2024-11-25)
 
 
