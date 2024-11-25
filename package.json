@@ -1,7 +1,7 @@
 {
     "name": "create-litium-accelerator",
     "author": "Hayo",
-    "version": "0.0.4",
+    "version": "0.0.5",
     "main": "index.js",
     "license": "MIT",
     "devDependencies": {

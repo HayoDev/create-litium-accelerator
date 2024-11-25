@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.5](https://github.com/HayoDev/create-litium-accelerator/compare/v0.0.4...v0.0.5) (2024-11-25)
+
+
+### Features
+
+* add process.env and removed dep [cross-env] ([6a2b32d](https://github.com/HayoDev/create-litium-accelerator/commit/6a2b32da091f266aebcf3f25702ede927df1fc74))
+
 ### [0.0.4](https://github.com/HayoDev/create-litium-accelerator/compare/v0.0.3...v0.0.4) (2024-11-25)
 
 
