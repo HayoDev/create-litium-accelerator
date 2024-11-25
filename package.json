@@ -14,12 +14,10 @@
         "type": "git",
         "url": "git+https://github.com/HayoDev/create-litium-accelerator.git"
     },
-    "bin": {
-        "create-litium-accelerator": "index.js"
-    },
+    "bin": "./index.js",
     "scripts": {
         "build": "node index.js",
-        "release": "standard-version && git push --follow-tags && npm publish --registry https://registry.npmjs.org/"
+        "release": "standard-version && git push --follow-tags && npm publish --registry https://registry.npmjs.org/ --access public"
     },
     "description": "litium boilerplate",
     "keywords": [
