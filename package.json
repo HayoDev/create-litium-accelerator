@@ -1,5 +1,6 @@
 {
     "name": "create-litium-headless",
+    "author": "Hayo",
     "version": "1.1.2",
     "main": "index.js",
     "license": "MIT",
@@ -7,6 +8,10 @@
         "command-exists": "^1.2.9",
         "cross-env": "^7.0.3",
         "standard-version": "^9.5.0"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/HayoDev/create-litium-accelerator.git"
     },
     "bin": "./index.js",
     "scripts": {
