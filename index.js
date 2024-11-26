@@ -7,36 +7,38 @@ import fs from 'fs';
 import path from 'path';
 import commandExists from 'command-exists';
 import readline from 'readline';
+import chalk from 'chalk';
+
 
 // Color functions
-const ttyEscape = (code) => `\u001B[${code}m`;
-const ttyMkBold = (color) => `${ttyEscape('1')}${ttyEscape(color)}`;
-const ttyBlue = (text) => `${ttyMkBold(34)}${text}${ttyEscape(0)}`;
-const ttyRed = (text) => `${ttyMkBold(31)}${text}${ttyEscape(0)}`;
-const ttyGreen = (text) => `${ttyMkBold(32)}${text}${ttyEscape(0)}`;
-const ttyYellow = (text) => `${ttyMkBold(33)}${text}${ttyEscape(0)}`;
-const ttyGrey = (text) => `${ttyMkBold(30)}${text}${ttyEscape(0)}`;
-const ttyBold = (text) => `${ttyMkBold(39)}${text}${ttyEscape(0)}`;
+// const ttyEscape = (code) => `\u001B[${code}m`;
+// const ttyMkBold = (color) => `${ttyEscape('1')}${ttyEscape(color)}`;
+// const ttyBlue = (text) => `${ttyMkBold(34)}${text}${ttyEscape(0)}`;
+// const ttyRed = (text) => `${ttyMkBold(31)}${text}${ttyEscape(0)}`;
+// const ttyGreen = (text) => `${ttyMkBold(32)}${text}${ttyEscape(0)}`;
+// const ttyYellow = (text) => `${ttyMkBold(33)}${text}${ttyEscape(0)}`;
+// const ttyGrey = (text) => `${ttyMkBold(30)}${text}${ttyEscape(0)}`;
+// const ttyBold = (text) => `${ttyMkBold(39)}${text}${ttyEscape(0)}`;
 
 // Log functions
 const pro = (message) => {
-  console.log(`${ttyBlue('==>')} ${ttyBold(message)}`);
+  console.log(`${chalk.bgBlue.black('==>')} ${chalk.bold(message)}`);
 };
 
 const inf = (message) => {
-  console.log(`${ttyGrey('===>')} ${ttyBold(message)}`);
+  console.log(`${chalk.bgMagenta.black('===>')} ${chalk.bold(message)}`);
 };
 
 const ok = (message) => {
-  console.log(`${ttyGreen('OK')} ${message}`);
+  console.log(`${chalk.green.black('OK')} ${message}`);
 };
 
 const warn = (message) => {
-  console.log(`${ttyYellow('WARN')} ${message}`);
+  console.log(`${chalk.bgYellow.black('WARN')} ${message}`);
 };
 
 const err = (message) => {
-  console.error(`${ttyRed('ERROR')} ${message}`);
+  console.error(`${chalk.bgRed.black('ERROR')} ${message}`);
 };
 
 /**
@@ -99,18 +101,18 @@ const platform = process.platform;
 const isWindows = platform === 'win32';
 
 // Variables with defaults. We will prompt the user for these:
-let projectPath = './LitiumAccelerator';
-let projectName = 'LitiumAccelerator';
+let projectPath = './'
+let projectName = 'LitiumAccelerator'
 let databaseName = `Litium-${new Intl.DateTimeFormat('sv-SE', { dateStyle: 'short' }).format(now)}`;
-let sqlServer = 'localhost';
-let sqlServerPort = sqlServerDocker.hostPort;
-let sqlServerUsername = 'sa';
-let sqlServerPassword = 'Pass@word';
-let applicationUrl = `${projectName.toLowerCase()}.localtest.me`;
-let applicationPort = isWindows ? '5000' : '6000';
-let applicationPortHttps = isWindows ? '5001' : '6001';
-let litiumUserName = 'admin';
-let litiumPassword = 'nimda';
+let sqlServer = 'localhost'
+let sqlServerPort = sqlServerDocker.hostPort
+let sqlServerUsername = 'sa'
+let sqlServerPassword = 'Pass@word'
+let applicationUrl = `${projectName.toLowerCase()}.localtest.me`
+let applicationPort =isWindows ? '5000' : '6000'
+let applicationPortHttps =isWindows ? '5001' : '6001'
+let litiumUserName ='admin'
+let litiumPassword ='nimda'
 let sqlServerDockerName = sqlServerDocker.name;
 let sqlServerDockerContainerPort = sqlServerDocker.containerPort;
 let projectType;
@@ -330,7 +332,9 @@ const askQuestion = (query, defaultValue) => {
   });
 
   return new Promise((resolve) => {
-    const formattedQuery = defaultValue ? `${query} (${defaultValue}): ` : `${query}: `;
+    const formattedQuery = defaultValue ?
+    `${chalk.bgHex("#2bff44").black(query)} ${chalk.yellow('[')}${chalk.bgBlack.yellow(defaultValue)}${chalk.yellow(']')}: ` :
+    `${chalk.bgHex("#2bff44").black(query)}: `; 
     rl.question(formattedQuery, (answer) => {
       rl.close();
       resolve(answer || defaultValue);
@@ -343,7 +347,7 @@ const askSelection = async (question, options, defaultValue = null) => {
   const optionList = options
     .map((option, index) => `  ${index + 1}) ${option}`)
     .join('\n');
-  const prompt = `${question}\n${optionList}\nPlease enter the number of your choice: `;
+  const prompt = `${chalk.bgHex("#2bff44").black(`${question}\n${chalk.bgBlack.yellow(optionList)}\nPlease enter the number of your choice: `)}`;
 
   const rl = readline.createInterface({
     input: process.stdin,
@@ -375,7 +379,7 @@ const askConfirmation = async (text) => {
     const prompt = () => {
       rl.question(text, (answer) => {
         const trimmedAnswer = answer.trim().toLowerCase();
-        if (trimmedAnswer === 'y' || trimmedAnswer === '') {
+        if (trimmedAnswer === 'y') {
           rl.close();
           resolve(true);
         } else if (trimmedAnswer === 'n') {
@@ -410,7 +414,7 @@ Summary of configuration:
 
 Do you want to proceed with the installation? (Y/n): `;
 
-  return await askConfirmation(summaryText);
+  return await askConfirmation(chalk.bgBlack.yellow.underline(summaryText));
 };
 
 // Function to prompt for variable values
@@ -430,7 +434,7 @@ const promptVariables = async () => {
   while (dbExists) {
     if (dbExists) {
       const overwrite = await askConfirmation(
-        `Database ${tempDb} already exists. Do you want to overwrite it? (Y/n): `
+        `${chalk.bgHex("#ee2bff").black(`Database ${tempDb} already exists. Do you want to overwrite it? (Y/n):`)}`
       );
       if (overwrite) {
         databaseName = tempDb;
@@ -503,7 +507,7 @@ const isDotnetToolInstalled = (commandName, directory) => {
 
     return false;
   } catch (error) {
-    err(`Failed to list dotnet tools: ${error.message}`);
+    err(`${chalk.bgRed}Failed to list dotnet tools: ${error.message}`);
     process.exit(1);
   }
 };
