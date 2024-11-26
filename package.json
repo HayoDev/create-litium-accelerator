@@ -23,7 +23,11 @@
     },
     "description": "litium boilerplate",
     "keywords": [
-        "litium"
+        "litium",
+        "ecommerce",
+        "accelerator",
+        "boilerplate",
+        "streamline"
     ],
     "bugs": {
         "url": "https://github.com/HayoDev/create-litium-accelerator/issues"

@@ -30,10 +30,6 @@ Before using `create-litium-accelerator`, ensure that you have the following ins
 - **Docker** with Docker Compose
   - Verify Docker is running and accessible.
 - **Docker Desktop** (if on Windows or Mac)
-- **Yarn** (for package management)
-  - Verify by running `yarn -v`.
-- **NPM** (Node Package Manager)
-  - Comes with Node.js, verify by running `npm -v`.
 
 ### Command Line Tools
 
@@ -41,7 +37,6 @@ Ensure the following commands are available in your system's PATH:
 
 - `dotnet`
 - `docker`
-- `npx`
 
 ### Docker Containers
 
@@ -83,7 +78,7 @@ npx create-litium-accelerator
 
 This command will fetch the latest version of `create-litium-accelerator` from NPM and execute it.
 
-### Using [Deno](https://docs.deno.com/runtime/getting_started/installation/) 
+### Or using [Deno](https://docs.deno.com/runtime/getting_started/installation/) 
 
 Run the following cmd in your terminal:
 
