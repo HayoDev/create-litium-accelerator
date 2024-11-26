@@ -1,12 +1,14 @@
 #!/usr/bin/env node
 
-process.env.NODE_TLS_REJECT_UNAUTHORIZED='0';
+process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 
-const { spawnSync, spawn, execSync } = require('child_process');
-const fs = require('fs');
-const path = require('path');
-const commandExists = require('command-exists');
-const readline = require('readline');
+import { spawnSync, spawn, execSync } from 'child_process';
+import fs from 'fs';
+import path from 'path';
+import commandExists from 'command-exists';
+import readline from 'readline';
+
+// Color functions
 const ttyEscape = (code) => `\u001B[${code}m`;
 const ttyMkBold = (color) => `${ttyEscape('1')}${ttyEscape(color)}`;
 const ttyBlue = (text) => `${ttyMkBold(34)}${text}${ttyEscape(0)}`;
@@ -16,61 +18,26 @@ const ttyYellow = (text) => `${ttyMkBold(33)}${text}${ttyEscape(0)}`;
 const ttyGrey = (text) => `${ttyMkBold(30)}${text}${ttyEscape(0)}`;
 const ttyBold = (text) => `${ttyMkBold(39)}${text}${ttyEscape(0)}`;
 
-// Constants
-const nodeVersion = '20';
-const currentDir = process.cwd();
-const dependencies = ['dotnet'];
-const platform = process.platform;
-const isWindows = platform === 'win32';
-const sqlServerDocker = getSqlServerDockerContainer();
-const now = new Date();
-
-// Variables with defaults. We will prompt the user for these:
-let projectPath = './LitiumAccelerator';
-let projectName = 'LitiumAccelerator';
-let databaseName = `Litium-${new Intl.DateTimeFormat('sv-SE', { dateStyle: 'short'}).format(now)}`;
-let sqlServer = 'localhost';
-let sqlServerPort = sqlServerDocker.hostPort;
-let sqlServerUsername = 'sa';
-let sqlServerPassword = 'Pass@word';
-let applicationUrl = `${projectName.toLowerCase()}.localtest.me`;
-let applicationPort = isWindows ? '5000' : '6000';
-let applicationPortHttps = isWindows ? '5001' : '6001';
-let litiumUserName = 'admin';
-let litiumPassword = 'nimda';
-let sqlServerDockerName = sqlServerDocker.name;
-let sqlServerDockerContainerPort = sqlServerDocker.containerPort;
-let projectType;
-let projectDirToRun;
-
-let litiumStorefrontToolPath = path.join(process.env.HOME || process.env.USERPROFILE, '.dotnet', 'tools', 'litium-storefront');
-
-if (isWindows) {
-  litiumStorefrontToolPath = path.join(process.env.HOME || process.env.USERPROFILE, '.dotnet', 'tools', 'litium-storefront.exe');
-}
-
-// Functions
-
-
-function pro(message) {
+// Log functions
+const pro = (message) => {
   console.log(`${ttyBlue('==>')} ${ttyBold(message)}`);
-}
+};
 
-function inf(message) {
+const inf = (message) => {
   console.log(`${ttyGrey('===>')} ${ttyBold(message)}`);
-}
+};
 
-function ok(message) {
+const ok = (message) => {
   console.log(`${ttyGreen('OK')} ${message}`);
-}
+};
 
-function warn(message) {
+const warn = (message) => {
   console.log(`${ttyYellow('WARN')} ${message}`);
-}
+};
 
-function err(message) {
+const err = (message) => {
   console.error(`${ttyRed('ERROR')} ${message}`);
-}
+};
 
 /**
  * @typedef {Object} DockerContainer
@@ -83,14 +50,18 @@ function err(message) {
  * Function to get the default Docker container name
  * @returns {DockerContainer}
  */
-function getSqlServerDockerContainer() {
-  var obj = {
+const getSqlServerDockerContainer = () => {
+  const obj = {
     name: 'sqlserver-1',
     hostPort: '1433',
     containerPort: '1433',
   };
   try {
-    const instances = spawnSync('docker', ['ps', '--format', '{{.Names}} {{.Ports}}', '--filter', 'name=sqlserver'], { encoding: 'utf8' })
+    const instances = spawnSync(
+      'docker',
+      ['ps', '--format', '{{.Names}} {{.Ports}}', '--filter', 'name=sqlserver'],
+      { encoding: 'utf8' }
+    )
       .stdout.trim()
       .split('\n');
     if (instances.length > 0 && instances[0] !== '') {
@@ -114,10 +85,55 @@ function getSqlServerDockerContainer() {
     warn('Docker command failed. Ensure Docker is installed and running.');
   }
   return obj;
+};
+
+// Initialize constants after defining functions
+const sqlServerDocker = getSqlServerDockerContainer();
+const now = new Date();
+
+// Constants and variables
+const nodeVersion = '20';
+const currentDir = process.cwd();
+const dependencies = ['dotnet'];
+const platform = process.platform;
+const isWindows = platform === 'win32';
+
+// Variables with defaults. We will prompt the user for these:
+let projectPath = './LitiumAccelerator';
+let projectName = 'LitiumAccelerator';
+let databaseName = `Litium-${new Intl.DateTimeFormat('sv-SE', { dateStyle: 'short' }).format(now)}`;
+let sqlServer = 'localhost';
+let sqlServerPort = sqlServerDocker.hostPort;
+let sqlServerUsername = 'sa';
+let sqlServerPassword = 'Pass@word';
+let applicationUrl = `${projectName.toLowerCase()}.localtest.me`;
+let applicationPort = isWindows ? '5000' : '6000';
+let applicationPortHttps = isWindows ? '5001' : '6001';
+let litiumUserName = 'admin';
+let litiumPassword = 'nimda';
+let sqlServerDockerName = sqlServerDocker.name;
+let sqlServerDockerContainerPort = sqlServerDocker.containerPort;
+let projectType;
+let projectDirToRun;
+
+let litiumStorefrontToolPath = path.join(
+  process.env.HOME || process.env.USERPROFILE,
+  '.dotnet',
+  'tools',
+  'litium-storefront'
+);
+
+if (isWindows) {
+  litiumStorefrontToolPath = path.join(
+    process.env.HOME || process.env.USERPROFILE,
+    '.dotnet',
+    'tools',
+    'litium-storefront.exe'
+  );
 }
 
-// Function to check for the sqlcmd path in the Docker container
-function getSqlCmdPath(containerName) {
+// Functions
+const getSqlCmdPath = (containerName) => {
   try {
     const command = `docker exec ${containerName} ls /opt`;
     const result = execSync(command, { encoding: 'utf8', shell: true }).trim();
@@ -145,9 +161,9 @@ function getSqlCmdPath(containerName) {
   }
 
   throw new Error('sqlcmd not found in any known paths');
-}
+};
 
-function checkDatabaseExists(database) {
+const checkDatabaseExists = (database) => {
   const sqlCmdPath = getSqlCmdPath(sqlServerDockerName);
   const sqlQuery = `SET NOCOUNT ON; SELECT name FROM sys.databases WHERE name = N'${database}';`;
   const command = `docker exec ${sqlServerDockerName} "${sqlCmdPath}" -S ${sqlServer},${sqlServerDockerContainerPort} -U ${sqlServerUsername} -P ${sqlServerPassword} -Q "${sqlQuery}" -h -1 -W`;
@@ -155,17 +171,20 @@ function checkDatabaseExists(database) {
     const result = execSync(command, { encoding: 'utf8', shell: true }).trim();
     return result === database;
   } catch (error) {
-    return false;
+    err(`Issues when validating if database "${database}" excists`);
+    err(error.message);
+    process.exit(1)
   }
-}
+};
 
-// Function to clear the existing project directory
-async function clearExistingProjectDirectory() {
+const clearExistingProjectDirectory = async () => {
   if (fs.existsSync(projectPath)) {
     const absoluteProjectPath = path.resolve(currentDir, projectPath);
     inf(`Folder "${absoluteProjectPath}" already exists.`);
-    const shouldDelete = await askConfirmation('Do you want to replace it? This will delete all contents in the folder?');
-    if(shouldDelete) {
+    const shouldDelete = await askConfirmation(
+      'Do you want to replace it? This will delete all contents in the folder? (Y/n): '
+    );
+    if (shouldDelete) {
       try {
         fs.rmSync(absoluteProjectPath, { recursive: true, force: true });
         ok(`Cleared existing folder: ${absoluteProjectPath}`);
@@ -181,9 +200,9 @@ async function clearExistingProjectDirectory() {
     }
   }
   return Promise.resolve();
-}
+};
 
-function checkDependencies(deps) {
+const checkDependencies = (deps) => {
   for (const dep of deps) {
     try {
       commandExists.sync(dep);
@@ -195,18 +214,18 @@ function checkDependencies(deps) {
     }
   }
 
-  console.log('All dependencies are installed! 🎉');
-}
+  ok('All dependencies are installed! 🎉');
+};
 
-function cleanup() {
+const cleanup = () => {
   pro('Cleaning up processes...');
   process.exit(1);
-}
+};
 
 process.on('SIGINT', cleanup);
 process.on('SIGTERM', cleanup);
 
-function runCommand(command, args = [], cwd = null, options = {}) {
+const runCommand = (command, args = [], cwd = null, options = {}) => {
   pro(`Running command: ${command} ${args.join(' ')} in ${cwd || 'current directory'}`);
   try {
     const result = spawnSync(command, args, {
@@ -225,17 +244,17 @@ function runCommand(command, args = [], cwd = null, options = {}) {
     err(`Failed to run command: ${command} ${args.join(' ')} in ${cwd || 'current directory'}`);
     process.exit(1);
   }
-}
+};
 
-function checkNodeVersion(expectedVersion) {
+const checkNodeVersion = (expectedVersion) => {
   const currentVersion = process.version.replace('v', '');
   if (!currentVersion.startsWith(expectedVersion)) {
     err(`Node.js version ${expectedVersion} is required. Current version: ${currentVersion}`);
     process.exit(1);
   }
-}
+};
 
-async function waitForSQLConnection() {
+const waitForSQLConnection = async () => {
   pro('Waiting for connection to the SQL server (in Docker container)...');
   let sqlConnected = false;
   let sqlAttempts = 0;
@@ -254,11 +273,11 @@ async function waitForSQLConnection() {
     try {
       const command = `docker exec ${sqlServerDockerName} "${sqlCmdPath}" -S ${sqlServer} -U ${sqlServerUsername} -P ${sqlServerPassword} -Q "SELECT 1" -C`;
       const result = execSync(command, { stdio: 'pipe', shell: true });
-      console.log('SQL Command Output:', result.toString());
+      inf('SQL Command Output: ' + result.toString());
       sqlConnected = true;
     } catch (error) {
       sqlAttempts++;
-      console.error(`Attempt ${sqlAttempts} failed:`, error.message);
+      warn(`Attempt ${sqlAttempts} failed: ${error.message}`);
       await new Promise((resolve) => setTimeout(resolve, 4000));
     }
   }
@@ -267,44 +286,44 @@ async function waitForSQLConnection() {
     err('Could not connect to SQL server. Aborting.');
     process.exit(1);
   }
-}
+};
 
-async function waitForServerReady() {
+const waitForServerReady = async () => {
   let serverReady = false;
   let serverAttempts = 0;
   const maxServerAttempts = 60;
 
-  console.log(`Waiting for server to be ready at https://${applicationUrl}:${applicationPortHttps}/litium`);
+  pro(`Waiting for server to be ready at https://${applicationUrl}:${applicationPortHttps}/litium`);
 
   while (!serverReady && serverAttempts < maxServerAttempts) {
     try {
       const response = await fetch(`https://${applicationUrl}:${applicationPortHttps}/litium`);
-      console.log(`Attempt ${serverAttempts + 1}: Status ${response.status}`);
+      inf(`Attempt ${serverAttempts + 1}: Status ${response.status}`);
 
       // Check for both 200 and 302 status codes
       if (response.status === 302 || response.status === 200) {
         serverReady = true;
-        console.log('Server is ready!');
+        ok('Server is ready!');
       }
     } catch (error) {
-      console.log(`Attempt ${serverAttempts + 1} failed:`, error.message);
+      warn(`Attempt ${serverAttempts + 1} failed: ${error.message}`);
     }
 
     if (!serverReady) {
       serverAttempts++;
-      pro(`Waiting 3 seconds before next attempt (${serverAttempts}/${maxServerAttempts})...`)
+      pro(`Waiting 3 seconds before next attempt (${serverAttempts}/${maxServerAttempts})...`);
       await new Promise((resolve) => setTimeout(resolve, 3000));
     }
   }
 
   if (!serverReady) {
-    console.error('.NET server did not start in time. Aborting.');
+    err('.NET server did not start in time. Aborting.');
     process.exit(1);
   }
-}
+};
 
 // Function to prompt user for input
-function askQuestion(query, defaultValue) {
+const askQuestion = (query, defaultValue) => {
   const rl = readline.createInterface({
     input: process.stdin,
     output: process.stdout,
@@ -317,11 +336,13 @@ function askQuestion(query, defaultValue) {
       resolve(answer || defaultValue);
     });
   });
-}
+};
 
 // Function to prompt user for selection
-async function askSelection(question, options, defaultValue = null) {
-  const optionList = options.map((option, index) => `  ${index + 1}) ${option}`).join('\n');
+const askSelection = async (question, options, defaultValue = null) => {
+  const optionList = options
+    .map((option, index) => `  ${index + 1}) ${option}`)
+    .join('\n');
   const prompt = `${question}\n${optionList}\nPlease enter the number of your choice: `;
 
   const rl = readline.createInterface({
@@ -337,12 +358,12 @@ async function askSelection(question, options, defaultValue = null) {
       if (selectedIndex >= 0 && selectedIndex < options.length) {
         resolve(options[selectedIndex]);
       } else {
-        console.log('Invalid choice. Please try again.');
+        warn('Invalid choice. Please try again.');
         resolve(askSelection(question, options, defaultValue));
       }
     });
   });
-}
+};
 
 const askConfirmation = async (text) => {
   const rl = readline.createInterface({
@@ -354,15 +375,14 @@ const askConfirmation = async (text) => {
     const prompt = () => {
       rl.question(text, (answer) => {
         const trimmedAnswer = answer.trim().toLowerCase();
-        console.log(trimmedAnswer);
-        if (trimmedAnswer === 'y') {
+        if (trimmedAnswer === 'y' || trimmedAnswer === '') {
           rl.close();
           resolve(true);
         } else if (trimmedAnswer === 'n') {
           rl.close();
           resolve(false);
         } else {
-          console.log('Please enter "y" or "n"');
+          warn('Please enter "y" or "n"');
           // Repeat the prompt without closing rl
           prompt();
         }
@@ -373,40 +393,45 @@ const askConfirmation = async (text) => {
 };
 
 // Function to display summary and confirm installation
-async function displaySummaryAndConfirm() {
+const displaySummaryAndConfirm = async () => {
   const summaryText = `
-  Summary of configuration:
-   - Project Path: ${path.resolve(currentDir, projectPath)}
-   - Project Name: ${projectName}
-   - Database Name: ${databaseName}
-   - SQL Server: ${sqlServer}
-   - SQL Server Username: ${sqlServerUsername}
-   - SQL Server Password: ${sqlServerPassword}
-   - Application URL: ${applicationUrl}:${applicationPortHttps}
-   - Litium Username: ${litiumUserName}
-   - Litium Password: ${litiumPassword}
-   - SQL Server Docker Container Name: ${sqlServerDockerName}
-   - Project Type: ${projectType}
+Summary of configuration:
+ - Project Path: ${path.resolve(currentDir, projectPath)}
+ - Project Name: ${projectName}
+ - Database Name: ${databaseName}
+ - SQL Server: ${sqlServer}
+ - SQL Server Username: ${sqlServerUsername}
+ - SQL Server Password: ${sqlServerPassword}
+ - Application URL: ${applicationUrl}:${applicationPortHttps}
+ - Litium Username: ${litiumUserName}
+ - Litium Password: ${litiumPassword}
+ - SQL Server Docker Container Name: ${sqlServerDockerName}
+ - Project Type: ${projectType}
 
-  Do you want to proceed with the installation? (Y/n): `;
+Do you want to proceed with the installation? (Y/n): `;
 
   return await askConfirmation(summaryText);
-}
+};
 
 // Function to prompt for variable values
-async function promptVariables() {
+const promptVariables = async () => {
   projectPath = await askQuestion('Enter project path', projectPath);
   projectName = await askQuestion('Enter project name', projectName);
   sqlServerDockerName = await askQuestion(`Enter SQL Server Docker container name`, sqlServerDockerName);
-  sqlServerDockerContainerPort = await askQuestion('Enter port for Docker SQL instance', sqlServerDockerContainerPort);
+  sqlServerDockerContainerPort = await askQuestion(
+    'Enter port for Docker SQL instance',
+    sqlServerDockerContainerPort
+  );
   databaseName = await askQuestion('Enter database name', databaseName);
- 
+
   let tempDb = databaseName;
   let dbExists = await checkDatabaseExists(tempDb);
 
   while (dbExists) {
     if (dbExists) {
-      const overwrite = await askConfirmation(`Database ${tempDb} already exists. Do you want to overwrite it? (Y/n): `);
+      const overwrite = await askConfirmation(
+        `Database ${tempDb} already exists. Do you want to overwrite it? (Y/n): `
+      );
       if (overwrite) {
         databaseName = tempDb;
         dbExists = false;
@@ -432,16 +457,16 @@ async function promptVariables() {
   const options = ['MVC', 'Headless'];
   projectType = await askSelection('Select project type to set up:', options);
   projectType = projectType.toLowerCase();
-}
+};
 
 // Function to check if tool manifest exists
-function toolManifestExists(directory) {
+const toolManifestExists = (directory) => {
   const manifestPath = path.join(directory, '.config', 'dotnet-tools.json');
   return fs.existsSync(manifestPath);
-}
+};
 
 // Function to check if a .NET tool is installed
-function isDotnetToolInstalled(commandName, directory) {
+const isDotnetToolInstalled = (commandName, directory) => {
   try {
     const result = spawnSync('dotnet', ['tool', 'list'], {
       cwd: directory,
@@ -481,11 +506,10 @@ function isDotnetToolInstalled(commandName, directory) {
     err(`Failed to list dotnet tools: ${error.message}`);
     process.exit(1);
   }
-}
+};
 
 // Function to set up the project (common for both MVC and Headless)
-function setupProject(backendDir) {
- 
+const setupProject = (backendDir) => {
   // Install the appropriate Litium template
   if (projectType === 'mvc') {
     inf('Installing MVC Accelerator Litium template...');
@@ -547,61 +571,61 @@ function setupProject(backendDir) {
 
   // Common appsettings for both MVC and Headless
   const appSettingsContent = `{
-  "Litium": {
-    "Data": {
-      "ConnectionString": "Pooling=true;User Id=${sqlServerUsername};Password=${sqlServerPassword};Database=${databaseName};Server=${sqlServer},${sqlServerPort};TrustServerCertificate=True",
-      "EnableSensitiveDataLogging": false
-    },
-    "Folder": {
-      "Local": "../files",
-      "Shared": null
-    },
-    "Elasticsearch": {
-      "ConnectionString": "http://127.0.0.1:9200",
-      "Username": null,
-      "Password": null,
-      "Prefix": "${projectType === 'mvc' ? 'AcceleratorV1' : 'StorefrontV1'}",
-      "Synonym": {
-        "Server": null,
-        "ApiKey": null
-      }
-    },
-    "Redis": {
-      "Prefix": "${projectType === 'mvc' ? 'AcceleratorV2' : 'StorefrontV2'}",
-      "Cache": {
-        "ConnectionString": null,
-        "Password": null
+    "Litium": {
+      "Data": {
+        "ConnectionString": "Pooling=true;User Id=${sqlServerUsername};Password=${sqlServerPassword};Database=${databaseName};Server=${sqlServer},${sqlServerPort};TrustServerCertificate=True",
+        "EnableSensitiveDataLogging": false
       },
-      "DistributedLock": {
-        "ConnectionString": null,
-        "Password": null
+      "Folder": {
+        "Local": "../files",
+        "Shared": null
       },
-      "ServiceBus": {
-        "ConnectionString": null,
-        "Password": null
-      }
-    },
-    ${projectType === 'headless' ? `
-    "Websites": {
-      "Storefronts": {
-        "headless-accelerator": {
-          "host": "https://localhost:3001"
+      "Elasticsearch": {
+        "ConnectionString": "http://127.0.0.1:9200",
+        "Username": null,
+        "Password": null,
+        "Prefix": "${projectType === 'mvc' ? 'AcceleratorV1' : 'StorefrontV1'}",
+        "Synonym": {
+          "Server": null,
+          "ApiKey": null
+        }
+      },
+      "Redis": {
+        "Prefix": "${projectType === 'mvc' ? 'AcceleratorV2' : 'StorefrontV2'}",
+        "Cache": {
+          "ConnectionString": null,
+          "Password": null
+        },
+        "DistributedLock": {
+          "ConnectionString": null,
+          "Password": null
+        },
+        "ServiceBus": {
+          "ConnectionString": null,
+          "Password": null
         }
       }
+      ${projectType === 'headless' ? `,
+      "Websites": {
+        "Storefronts": {
+          "headless-accelerator": {
+            "host": "https://localhost:3001"
+          }
+        }
+      }
+      ` : ''}
     }
-    ` : ''}
   }
-}
-`;
+  `;
 
   fs.writeFileSync(
     path.join(projectDirToRun, 'appsettings.Development.json'),
     appSettingsContent
   );
-}
+};
 
 // Function to set up Headless project
-function setupHeadlessProject(headlessDir) {
+const setupHeadlessProject = (headlessDir) => {
   // Create Headless project
   inf('Installing React Accelerator Litium template...');
   runCommand('dotnet', ['new', '--install', 'Litium.Accelerator.React.Templates'], headlessDir);
@@ -623,171 +647,172 @@ NODE_TLS_REJECT_UNAUTHORIZED="0"
   // Install dependencies with yarn for the headless project
   inf('Installing dependencies for the Litium React Accelerator...');
   runCommand('yarn', [], headlessDir);
+};
+
+// Main execution using top-level await
+await promptVariables();
+
+// Display summary of configurations and ask for confirmation
+const confirmResponse = await displaySummaryAndConfirm();
+if (!confirmResponse) {
+  inf('Installation cancelled by user.');
+  process.exit(0);
 }
 
-// Main execution
-(async () => {
+// Check and clear existing project directory
+await clearExistingProjectDirectory();
 
-  // Prompt the user for variable values
-  await promptVariables();
+// Resolve the project directory
+const projectDir = path.resolve(currentDir, projectPath);
 
-  // Display summary of configurations and ask for confirmation
-  const confirmResponse = await displaySummaryAndConfirm();
-  if (!confirmResponse) {
-    console.log('Installation cancelled by user.');
-    process.exit(0);
+// Define backendDir and headlessDir after projectDir is resolved
+const backendDir = path.join(projectDir, 'Litium'); // Should be inside projectDir
+const headlessDir = path.join(projectDir, 'Litium.Storefront'); // Should be inside projectDir
+
+if (projectType === 'mvc') {
+  // For MVC, the project is located at backendDir/Src/Litium.Accelerator.Mvc
+  projectDirToRun = path.join(backendDir, 'Src', 'Litium.Accelerator.Mvc');
+} else if (projectType === 'headless') {
+  // For Headless, adjust accordingly if needed
+  projectDirToRun = backendDir; // Assuming the project is directly under backendDir
+}
+
+// Create project directory if it doesn't exist
+if (!fs.existsSync(projectDir)) {
+  fs.mkdirSync(projectDir, { recursive: true });
+  ok(`Created project directory: ${projectDir}`);
+}
+
+checkDependencies(dependencies);
+checkNodeVersion(nodeVersion);
+
+pro('Setting up the Litium environment...');
+
+// Create necessary directories
+fs.mkdirSync(backendDir, { recursive: true });
+
+if (projectType === 'headless') {
+  fs.mkdirSync(headlessDir, { recursive: true });
+}
+
+// Set up the project
+setupProject(backendDir);
+
+if (projectType === 'headless') {
+  setupHeadlessProject(headlessDir);
+}
+
+// Wait for connection to SQL server (via Docker)
+await waitForSQLConnection();
+
+// Get the sqlcmd path
+let sqlCmdPath;
+try {
+  sqlCmdPath = getSqlCmdPath(sqlServerDockerName);
+} catch (error) {
+  err(error.message);
+  process.exit(1);
+}
+
+inf(`Creating database ${databaseName}...`);
+try {
+  if (checkDatabaseExists(databaseName)) {
+    // Drop the existing database
+    inf('Dropping the existing database');
+    const dropQuery = `USE master; ALTER DATABASE [${databaseName}] SET SINGLE_USER WITH ROLLBACK IMMEDIATE; DROP DATABASE [${databaseName}];`;
+    const dropCommand = `docker exec ${sqlServerDockerName} "${sqlCmdPath}" -S ${sqlServer},${sqlServerDockerContainerPort} -U ${sqlServerUsername} -P ${sqlServerPassword} -Q "${dropQuery}" -C`;
+    execSync(dropCommand, { stdio: 'inherit', shell: true });
+    inf(`Database ${databaseName} has been dropped.`);
   }
 
-  // Check and clear existing project directory
-  await clearExistingProjectDirectory();
+  inf(`Creating database ${databaseName}`);
 
-  // Resolve the project directory
-  const projectDir = path.resolve(currentDir, projectPath);
+  // Create the new database
+  const createQuery = `CREATE DATABASE [${databaseName}];`;
+  const createCommand = `docker exec ${sqlServerDockerName} "${sqlCmdPath}" -S ${sqlServer},${sqlServerDockerContainerPort} -U ${sqlServerUsername} -P ${sqlServerPassword} -Q "${createQuery}" -C`;
+  execSync(createCommand, { stdio: 'inherit', shell: true });
 
-  // Define backendDir and headlessDir after projectDir is resolved
-  const backendDir = path.join(projectDir, 'Litium'); // Should be inside projectDir
-  const headlessDir = path.join(projectDir, 'Litium.Storefront'); // Should be inside projectDir
+  inf(`Database ${databaseName} has been created.`);
+} catch (error) {
+  err('Error creating database: ' + error.message);
+}
 
-  if (projectType === 'mvc') {
-    // For MVC, the project is located at backendDir/Src/Litium.Accelerator.Mvc
-    projectDirToRun = path.join(backendDir, 'Src', 'Litium.Accelerator.Mvc');
-  } else if (projectType === 'headless') {
-    // For Headless, adjust accordingly if needed
-    projectDirToRun = backendDir; // Assuming the project is directly under backendDir
-  }
+inf('Updating database...');
+runCommand(
+  'dotnet',
+  [
+    'litium-db',
+    'update',
+    '--connection',
+    `${isWindows ? '"' : ''}Pooling=true;User Id=${sqlServerUsername};Password=${sqlServerPassword};Database=${databaseName};Server=${sqlServer},${sqlServerPort};TrustServerCertificate=True${isWindows ? '"' : ''}`,
+  ],
+  backendDir
+);
 
-  // Create project directory if it doesn't exist
-  if (!fs.existsSync(projectDir)) {
-    fs.mkdirSync(projectDir, { recursive: true });
-    ok(`Created project directory: ${projectDir}`);
-  }
+inf('Adding user...');
+runCommand(
+  'dotnet',
+  [
+    'litium-db',
+    'user',
+    '--connection',
+    `${isWindows ? '"' : ''}Pooling=true;User Id=${sqlServerUsername};Password=${sqlServerPassword};Database=${databaseName};Server=${sqlServer},${sqlServerPort};TrustServerCertificate=True${isWindows ? '"' : ''}`,
+    '--login',
+    litiumUserName,
+    '--password',
+    litiumPassword,
+  ],
+  backendDir
+);
 
-  checkDependencies(dependencies);
-  checkNodeVersion(nodeVersion);
+// Start .NET server
+inf('Starting .NET server...');
 
-  pro('Setting up the Litium environment...');
+const dotnetProcess = spawn('dotnet', ['run'], {
+  cwd: projectDirToRun,
+  stdio: 'inherit',
+  shell: isWindows,
+});
 
-  // Create necessary directories
-  fs.mkdirSync(backendDir, { recursive: true });
+await waitForServerReady();
 
-  if (projectType === 'headless') {
-    fs.mkdirSync(headlessDir, { recursive: true });
-  }
-
-  // Set up the project
-  setupProject(backendDir);
-
-  if (projectType === 'headless') {
-    setupHeadlessProject(headlessDir);
-  }
-
-  // Wait for connection to SQL server (via Docker)
-  await waitForSQLConnection();
-
-  // Get the sqlcmd path
-  let sqlCmdPath;
-  try {
-    sqlCmdPath = getSqlCmdPath(sqlServerDockerName);
-  } catch (error) {
-    err(error.message);
-    process.exit(1);
-  }
-
-  inf(`Creating database ${databaseName}...`);
-  try {
-
-    if (checkDatabaseExists(databaseName)) {
-      // Drop the existing database
-      inf('Drop the existing database');
-      const dropQuery = `USE master; ALTER DATABASE [${databaseName}] SET SINGLE_USER WITH ROLLBACK IMMEDIATE; DROP DATABASE [${databaseName}];`;
-      const dropCommand = `docker exec ${sqlServerDockerName} "${sqlCmdPath}" -S ${sqlServer},${sqlServerDockerContainerPort} -U ${sqlServerUsername} -P ${sqlServerPassword} -Q "${dropQuery}" -C`;
-      execSync(dropCommand, { stdio: 'inherit', shell: true });
-      inf(`Database ${databaseName} has been dropped.`);
-    }
-
-    inf(`Creating database ${databaseName}}`);
-
-    // Create the new database
-    const createQuery = `CREATE DATABASE [${databaseName}];`;
-    const createCommand = `docker exec ${sqlServerDockerName} "${sqlCmdPath}" -S ${sqlServer},${sqlServerDockerContainerPort} -U ${sqlServerUsername} -P ${sqlServerPassword} -Q "${createQuery}" -C`;
-    execSync(createCommand, { stdio: 'inherit', shell: true });
-
-    inf(`Database ${databaseName} has been created.`);
-  } catch (error) {
-    console.error('Error creating database:', error.message);
-  }
-
-  inf('Updating database...');
+if (projectType === 'headless') {
+  // Import headless definitions
+  inf('Importing headless definitions...');
   runCommand(
-    'dotnet',
+    litiumStorefrontToolPath,
     [
-      'litium-db',
-      'update',
-      '--connection',
-      `${isWindows ? '"' : ''}Pooling=true;User Id=${sqlServerUsername};Password=${sqlServerPassword};Database=${databaseName};Server=${sqlServer},${sqlServerPort};TrustServerCertificate=True${isWindows ? '"' : ''}`,
-    ],
-    backendDir
-  );
-
-  inf('Adding user...');
-  runCommand(
-    'dotnet',
-    [
-      'litium-db',
-      'user',
-      '--connection',
-      `${isWindows ? '"' : ''}Pooling=true;User Id=${sqlServerUsername};Password=${sqlServerPassword};Database=${databaseName};Server=${sqlServer},${sqlServerPort};TrustServerCertificate=True${isWindows ? '"' : ''}`,
-      '--login',
+      'definition',
+      'import',
+      '--file',
+      `${headlessDir}/litium-definitions/**/*.yaml`,
+      '--litium',
+      `https://${applicationUrl}:${applicationPortHttps}`,
+      '--litium-username',
       litiumUserName,
-      '--password',
+      '--litium-password',
       litiumPassword,
+      '--insecure',
     ],
-    backendDir
+    headlessDir
   );
 
-  // Start .NET server
-  inf('Starting .NET server...');
+  // Export headless translations
+  inf('Exporting headless translations...');
+  runCommand(
+    litiumStorefrontToolPath,
+    [
+      'text',
+      'convert-to-excel',
+      '-i',
+      './litium-definitions/texts/*.yaml',
+      '-f',
+      './litium-definitions/texts/xls/texts.xlsx',
+    ],
+    headlessDir
+  );
+}
 
-  const dotnetProcess = spawn('dotnet', ['run'], { cwd: projectDirToRun, stdio: 'inherit', shell: isWindows });
-
-  await waitForServerReady();
-
-  if (projectType === 'headless') {
-    // Import headless definitions
-    inf('Importing headless definitions...');
-    runCommand(
-      litiumStorefrontToolPath,
-      [
-        'definition',
-        'import',
-        '--file',
-        `${headlessDir}/litium-definitions/**/*.yaml`,
-        '--litium',
-        `https://${applicationUrl}:${applicationPortHttps}`,
-        '--litium-username',
-        litiumUserName,
-        '--litium-password',
-        litiumPassword,
-        '--insecure',
-      ],
-      headlessDir
-    );
-
-    // Export headless translations
-    inf('Exporting headless translations...');
-    runCommand(
-      litiumStorefrontToolPath,
-      [
-        'text',
-        'convert-to-excel',
-        '-i',
-        './litium-definitions/texts/*.yaml',
-        '-f',
-        './litium-definitions/texts/xls/texts.xlsx',
-      ],
-      headlessDir
-    );
-  }
-
-  ok(`Litium environment setup completed successfully. Access back office at https://${applicationUrl}:${applicationPortHttps}/litium`);
-})();
+ok(
+  `Litium environment setup completed successfully. Access back office at https://${applicationUrl}:${applicationPortHttps}/litium`
+);

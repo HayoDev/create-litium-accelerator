@@ -3,6 +3,7 @@
     "author": "Hayo",
     "version": "0.0.10",
     "main": "index.js",
+    "type": "module",
     "license": "MIT",
     "devDependencies": {
         "standard-version": "^9.5.0"
