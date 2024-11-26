@@ -83,9 +83,17 @@ npx create-litium-accelerator
 
 This command will fetch the latest version of `create-litium-accelerator` from NPM and execute it.
 
+### Using [Deno](https://docs.deno.com/runtime/getting_started/installation/) 
+
+Run the following cmd in your terminal:
+
+```bash
+deno run -A npm:@hayodev/create-litium-accelerator 
+```
+
 ### Step 3: Follow the Interactive Prompts
 
-The `npx` command will interactively prompt you for all required information. Provide the requested details as per your development environment:
+The `npx` or `deno run` command will interactively prompt you for all required information. Provide the requested details as per your development environment:
 
 - **Project Path**: The directory where the project will be created.
 - **Project Name**: Name of the Litium project.
