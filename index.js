@@ -104,21 +104,21 @@ if (isWindows) {
 
 // Centralized color definitions
 const colors = {
-  primaryBg: '#8600f4', // Dark blue
-  primaryText: '#ffffff', // White
-  secondaryBg: '#c711ff', // Medium blue
-  secondaryText: '#ffffff', // White
-  errorBg: '#e40505', // Red
-  errorText: '#ffffff', // White
-  warningBg: '#ffa000', // Orange
-  warningText: '#000000', // Black
-  infoBg: '#64b5f6', // Light blue
-  infoText: '#000000', // Black
-  successBg: '#3ff448', // Green
-  successText: '#ffffff', // White
-  highlightText: '#ffeb3b', // Yellow
-  importantBg: '#ffeb3b', // Yellow
-  importantText: '#000000', // Black
+  primaryBg: '#8600f4',
+  primaryText: '#ffffff',
+  secondaryBg: '#c711ff',
+  secondaryText: '#000000',
+  errorBg: '#e40505',
+  errorText: '#ffffff',
+  warningBg: '#ffa000',
+  warningText: '#000000',
+  infoBg: '#64b5f6',
+  infoText: '#000000',
+  successBg: '#3ff448',
+  successText: '#000000',
+  highlightText: '#ffeb3b',
+  importantBg: '#ffeb3b',
+  importantText: '#000000',
 };
 
 // Helper functions for colored output
@@ -162,12 +162,12 @@ const formatQuestionPrompt = (query, defaultValue) => {
 const formatSelectionPrompt = (question, options) => {
   const optionList = options.map((option, index) => `  ${index + 1}) ${option}`).join('\n');
   return `${chalk.bgHex(colors.primaryBg).hex(colors.primaryText)(
-    `${question}\n${chalk.hex(colors.highlightText)(optionList)}\nPlease enter the number of your choice: `
-  )}`;
+    `${question}\n${chalk.hex(colors.highlightText)(optionList)}\nPlease enter the number of your choice:`
+  )} `;
 };
 
 const formatConfirmationPrompt = (text) => {
-  return chalk.bgHex(colors.importantBg).hex(colors.importantText).bold(text);
+  return `${chalk.bgHex(colors.importantBg).hex(colors.importantText).bold(text)} `;
 };
 
 // Functions
@@ -220,7 +220,7 @@ const clearExistingProjectDirectory = async () => {
     const absoluteProjectPath = path.resolve(currentDir, projectPath);
     inf(`Folder "${absoluteProjectPath}" already exists.`);
     const shouldDelete = await Prompts.askConfirmation(
-      'Do you want to replace it? This will delete all contents in the folder? (Y/n): '
+      'Do you want to replace it? This will delete all contents in the folder? (Y/n):'
     );
     if (shouldDelete) {
       try {
@@ -451,7 +451,7 @@ Summary of configuration:
  - SQL Server Docker Container Name: ${sqlServerDockerName}
  - Project Type: ${projectType}
 
-Do you want to proceed with the installation? (Y/n): `;
+Do you want to proceed with the installation? (Y/n):`;
 
   return await Prompts.askConfirmation(summaryText);
 };
@@ -460,6 +460,7 @@ Do you want to proceed with the installation? (Y/n): `;
 const promptVariables = async () => {
   projectPath = await Prompts.askQuestion('Enter project path', projectPath);
   projectName = await Prompts.askQuestion('Enter project name', projectName);
+  projectPath = path.join(projectPath, projectName);
   sqlServerDockerName = await Prompts.askQuestion(`Enter SQL Server Docker container name`, sqlServerDockerName);
   sqlServerDockerContainerPort = await Prompts.askQuestion(
     'Enter port for Docker SQL instance',
@@ -473,7 +474,7 @@ const promptVariables = async () => {
   while (dbExists) {
     if (dbExists) {
       const overwrite = await Prompts.askConfirmation(
-        `Database ${tempDb} already exists. Do you want to overwrite it? (Y/n): `
+        `Database ${tempDb} already exists. Do you want to overwrite it? (Y/n):`
       );
       if (overwrite) {
         databaseName = tempDb;
