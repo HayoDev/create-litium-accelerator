@@ -5,7 +5,7 @@
 
 ## Introduction
 
-`create-litium-accelerator` is a Node.js package that streamlines the setup of a Litium development environment. It provides an easy and recommended way to create a new Litium project with minimal configuration, reducing setup time and potential errors.
+`create-litium-accelerator` is a [Node.js](https://nodejs.org/en) package that streamlines the setup of a Litium development environment. It provides an easy and recommended way to create a new Litium project with minimal configuration, reducing setup time and potential errors.
 
 Litium offers accelerators to help you create unique customer experiences quickly while reducing time to market and lowering project risks. Using `create-litium-accelerator` simplifies the installation process and ensures all components are correctly configured.
 
