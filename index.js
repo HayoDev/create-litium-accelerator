@@ -9,38 +9,6 @@ import commandExists from 'command-exists';
 import readline from 'readline';
 import chalk from 'chalk';
 
-
-// Color functions
-// const ttyEscape = (code) => `\u001B[${code}m`;
-// const ttyMkBold = (color) => `${ttyEscape('1')}${ttyEscape(color)}`;
-// const ttyBlue = (text) => `${ttyMkBold(34)}${text}${ttyEscape(0)}`;
-// const ttyRed = (text) => `${ttyMkBold(31)}${text}${ttyEscape(0)}`;
-// const ttyGreen = (text) => `${ttyMkBold(32)}${text}${ttyEscape(0)}`;
-// const ttyYellow = (text) => `${ttyMkBold(33)}${text}${ttyEscape(0)}`;
-// const ttyGrey = (text) => `${ttyMkBold(30)}${text}${ttyEscape(0)}`;
-// const ttyBold = (text) => `${ttyMkBold(39)}${text}${ttyEscape(0)}`;
-
-// Log functions
-const pro = (message) => {
-  console.log(`${chalk.bgBlue.black('==>')} ${chalk.bold(message)}`);
-};
-
-const inf = (message) => {
-  console.log(`${chalk.bgMagenta.black('===>')} ${chalk.bold(message)}`);
-};
-
-const ok = (message) => {
-  console.log(`${chalk.green.black('OK')} ${message}`);
-};
-
-const warn = (message) => {
-  console.log(`${chalk.bgYellow.black('WARN')} ${message}`);
-};
-
-const err = (message) => {
-  console.error(`${chalk.bgRed.black('ERROR')} ${message}`);
-};
-
 /**
  * @typedef {Object} DockerContainer
  * @property {string} name
@@ -101,18 +69,18 @@ const platform = process.platform;
 const isWindows = platform === 'win32';
 
 // Variables with defaults. We will prompt the user for these:
-let projectPath = './'
-let projectName = 'LitiumAccelerator'
+let projectPath = './';
+let projectName = 'LitiumAccelerator';
 let databaseName = `Litium-${new Intl.DateTimeFormat('sv-SE', { dateStyle: 'short' }).format(now)}`;
-let sqlServer = 'localhost'
-let sqlServerPort = sqlServerDocker.hostPort
-let sqlServerUsername = 'sa'
-let sqlServerPassword = 'Pass@word'
-let applicationUrl = `${projectName.toLowerCase()}.localtest.me`
-let applicationPort =isWindows ? '5000' : '6000'
-let applicationPortHttps =isWindows ? '5001' : '6001'
-let litiumUserName ='admin'
-let litiumPassword ='nimda'
+let sqlServer = 'localhost';
+let sqlServerPort = sqlServerDocker.hostPort;
+let sqlServerUsername = 'sa';
+let sqlServerPassword = 'Pass@word';
+let applicationUrl = `${projectName.toLowerCase()}.localtest.me`;
+let applicationPort = isWindows ? '5000' : '6000';
+let applicationPortHttps = isWindows ? '5001' : '6001';
+let litiumUserName = 'admin';
+let litiumPassword = 'nimda';
 let sqlServerDockerName = sqlServerDocker.name;
 let sqlServerDockerContainerPort = sqlServerDocker.containerPort;
 let projectType;
@@ -133,6 +101,74 @@ if (isWindows) {
     'litium-storefront.exe'
   );
 }
+
+// Centralized color definitions
+const colors = {
+  primaryBg: '#0d47a1', // Dark blue
+  primaryText: '#ffffff', // White
+  secondaryBg: '#1976d2', // Medium blue
+  secondaryText: '#ffffff', // White
+  errorBg: '#d32f2f', // Red
+  errorText: '#ffffff', // White
+  warningBg: '#ffa000', // Orange
+  warningText: '#000000', // Black
+  infoBg: '#64b5f6', // Light blue
+  infoText: '#000000', // Black
+  successBg: '#388e3c', // Green
+  successText: '#ffffff', // White
+  highlightText: '#ffeb3b', // Yellow
+  importantBg: '#ffeb3b', // Yellow
+  importantText: '#000000', // Black
+};
+
+// Helper functions for colored output
+const inf = (message) => {
+  console.log(chalk.bgHex(colors.infoBg).hex(colors.infoText)(message));
+};
+
+const warn = (message) => {
+  console.log(chalk.bgHex(colors.warningBg).hex(colors.warningText)(message));
+};
+
+const err = (message) => {
+  console.log(chalk.bgHex(colors.errorBg).hex(colors.errorText)(message));
+};
+
+const pro = (message) => {
+  console.log(chalk.bgHex(colors.secondaryBg).hex(colors.secondaryText)(message));
+};
+
+const ok = (message) => {
+  console.log(chalk.bgHex(colors.successBg).hex(colors.successText)(message));
+};
+
+const important = (message) => {
+  console.log(chalk.bgHex(colors.importantBg).hex(colors.importantText).bold(message));
+};
+
+// Helper functions for formatting prompts
+const formatQuestionPrompt = (query, defaultValue) => {
+  if (defaultValue) {
+    return `${chalk.bgHex(colors.primaryBg).hex(colors.primaryText)(query)} ${chalk.hex(colors.highlightText)(
+      '['
+    )}${chalk.bgHex(colors.secondaryBg).hex(colors.highlightText)(defaultValue)}${chalk.hex(colors.highlightText)(
+      ']'
+    )}: `;
+  } else {
+    return `${chalk.bgHex(colors.primaryBg).hex(colors.primaryText)(query)}: `;
+  }
+};
+
+const formatSelectionPrompt = (question, options) => {
+  const optionList = options.map((option, index) => `  ${index + 1}) ${option}`).join('\n');
+  return `${chalk.bgHex(colors.primaryBg).hex(colors.primaryText)(
+    `${question}\n${chalk.hex(colors.highlightText)(optionList)}\nPlease enter the number of your choice: `
+  )}`;
+};
+
+const formatConfirmationPrompt = (text) => {
+  return chalk.bgHex(colors.importantBg).hex(colors.importantText).bold(text);
+};
 
 // Functions
 const getSqlCmdPath = (containerName) => {
@@ -173,9 +209,9 @@ const checkDatabaseExists = (database) => {
     const result = execSync(command, { encoding: 'utf8', shell: true }).trim();
     return result === database;
   } catch (error) {
-    err(`Issues when validating if database "${database}" excists`);
+    err(`Issues when validating if database "${database}" exists`);
     err(error.message);
-    process.exit(1)
+    process.exit(1);
   }
 };
 
@@ -183,7 +219,7 @@ const clearExistingProjectDirectory = async () => {
   if (fs.existsSync(projectPath)) {
     const absoluteProjectPath = path.resolve(currentDir, projectPath);
     inf(`Folder "${absoluteProjectPath}" already exists.`);
-    const shouldDelete = await askConfirmation(
+    const shouldDelete = await Prompts.askConfirmation(
       'Do you want to replace it? This will delete all contents in the folder? (Y/n): '
     );
     if (shouldDelete) {
@@ -324,76 +360,77 @@ const waitForServerReady = async () => {
   }
 };
 
-// Function to prompt user for input
-const askQuestion = (query, defaultValue) => {
-  const rl = readline.createInterface({
-    input: process.stdin,
-    output: process.stdout,
-  });
-
-  return new Promise((resolve) => {
-    const formattedQuery = defaultValue ?
-    `${chalk.bgHex("#2bff44").black(query)} ${chalk.yellow('[')}${chalk.bgBlack.yellow(defaultValue)}${chalk.yellow(']')}: ` :
-    `${chalk.bgHex("#2bff44").black(query)}: `; 
-    rl.question(formattedQuery, (answer) => {
-      rl.close();
-      resolve(answer || defaultValue);
+// Interactive prompts encapsulated in a Prompts object
+const Prompts = {
+  // Function to prompt user for input
+  askQuestion: (query, defaultValue) => {
+    const rl = readline.createInterface({
+      input: process.stdin,
+      output: process.stdout,
     });
-  });
-};
 
-// Function to prompt user for selection
-const askSelection = async (question, options, defaultValue = null) => {
-  const optionList = options
-    .map((option, index) => `  ${index + 1}) ${option}`)
-    .join('\n');
-  const prompt = `${chalk.bgHex("#2bff44").black(`${question}\n${chalk.bgBlack.yellow(optionList)}\nPlease enter the number of your choice: `)}`;
-
-  const rl = readline.createInterface({
-    input: process.stdin,
-    output: process.stdout,
-  });
-
-  return new Promise((resolve) => {
-    rl.question(prompt, (answer) => {
-      rl.close();
-      const choice = answer.trim();
-      const selectedIndex = parseInt(choice, 10) - 1;
-      if (selectedIndex >= 0 && selectedIndex < options.length) {
-        resolve(options[selectedIndex]);
-      } else {
-        warn('Invalid choice. Please try again.');
-        resolve(askSelection(question, options, defaultValue));
-      }
+    return new Promise((resolve) => {
+      const formattedQuery = formatQuestionPrompt(query, defaultValue);
+      rl.question(formattedQuery, (answer) => {
+        rl.close();
+        resolve(answer || defaultValue);
+      });
     });
-  });
-};
+  },
 
-const askConfirmation = async (text) => {
-  const rl = readline.createInterface({
-    input: process.stdin,
-    output: process.stdout,
-  });
+  // Function to prompt user for selection
+  askSelection: async (question, options, defaultValue = null) => {
+    const prompt = formatSelectionPrompt(question, options);
 
-  return new Promise((resolve) => {
-    const prompt = () => {
-      rl.question(text, (answer) => {
-        const trimmedAnswer = answer.trim().toLowerCase();
-        if (trimmedAnswer === 'y') {
-          rl.close();
-          resolve(true);
-        } else if (trimmedAnswer === 'n') {
-          rl.close();
-          resolve(false);
+    const rl = readline.createInterface({
+      input: process.stdin,
+      output: process.stdout,
+    });
+
+    return new Promise((resolve) => {
+      rl.question(prompt, (answer) => {
+        rl.close();
+        const choice = answer.trim();
+        const selectedIndex = parseInt(choice, 10) - 1;
+        if (selectedIndex >= 0 && selectedIndex < options.length) {
+          resolve(options[selectedIndex]);
         } else {
-          warn('Please enter "y" or "n"');
-          // Repeat the prompt without closing rl
-          prompt();
+          warn('Invalid choice. Please try again.');
+          resolve(Prompts.askSelection(question, options, defaultValue));
         }
       });
-    };
-    prompt();
-  });
+    });
+  },
+
+  // Function to prompt user for confirmation with highlighted message
+  askConfirmation: async (text) => {
+    const rl = readline.createInterface({
+      input: process.stdin,
+      output: process.stdout,
+    });
+
+    const formattedText = formatConfirmationPrompt(text);
+
+    return new Promise((resolve) => {
+      const prompt = () => {
+        rl.question(formattedText, (answer) => {
+          const trimmedAnswer = answer.trim().toLowerCase();
+          if (trimmedAnswer === 'y') {
+            rl.close();
+            resolve(true);
+          } else if (trimmedAnswer === 'n') {
+            rl.close();
+            resolve(false);
+          } else {
+            warn('Please enter "y" or "n"');
+            // Repeat the prompt without closing rl
+            prompt();
+          }
+        });
+      };
+      prompt();
+    });
+  },
 };
 
 // Function to display summary and confirm installation
@@ -414,52 +451,52 @@ Summary of configuration:
 
 Do you want to proceed with the installation? (Y/n): `;
 
-  return await askConfirmation(chalk.bgBlack.yellow.underline(summaryText));
+  return await Prompts.askConfirmation(summaryText);
 };
 
 // Function to prompt for variable values
 const promptVariables = async () => {
-  projectPath = await askQuestion('Enter project path', projectPath);
-  projectName = await askQuestion('Enter project name', projectName);
-  sqlServerDockerName = await askQuestion(`Enter SQL Server Docker container name`, sqlServerDockerName);
-  sqlServerDockerContainerPort = await askQuestion(
+  projectPath = await Prompts.askQuestion('Enter project path', projectPath);
+  projectName = await Prompts.askQuestion('Enter project name', projectName);
+  sqlServerDockerName = await Prompts.askQuestion(`Enter SQL Server Docker container name`, sqlServerDockerName);
+  sqlServerDockerContainerPort = await Prompts.askQuestion(
     'Enter port for Docker SQL instance',
     sqlServerDockerContainerPort
   );
-  databaseName = await askQuestion('Enter database name', databaseName);
+  databaseName = await Prompts.askQuestion('Enter database name', databaseName);
 
   let tempDb = databaseName;
   let dbExists = await checkDatabaseExists(tempDb);
 
   while (dbExists) {
     if (dbExists) {
-      const overwrite = await askConfirmation(
-        `${chalk.bgHex("#ee2bff").black(`Database ${tempDb} already exists. Do you want to overwrite it? (Y/n):`)}`
+      const overwrite = await Prompts.askConfirmation(
+        `Database ${tempDb} already exists. Do you want to overwrite it? (Y/n): `
       );
       if (overwrite) {
         databaseName = tempDb;
         dbExists = false;
       } else {
-        tempDb = await askQuestion('Enter another name for the database', tempDb);
+        tempDb = await Prompts.askQuestion('Enter another name for the database', tempDb);
         dbExists = await checkDatabaseExists(tempDb);
         databaseName = tempDb;
       }
     }
   }
 
-  sqlServer = await askQuestion('Enter SQL Server address', sqlServer);
-  sqlServerPort = await askQuestion('Enter SQL Server port', sqlServerPort);
-  sqlServerUsername = await askQuestion('Enter SQL Server username', sqlServerUsername);
-  sqlServerPassword = await askQuestion('Enter SQL Server password', sqlServerPassword);
-  applicationUrl = await askQuestion('Enter application URL', `${projectName.toLowerCase()}.localtest.me`);
-  applicationPort = await askQuestion('Enter application port (Http)', applicationPort);
-  applicationPortHttps = await askQuestion('Enter secure application port (Https)', applicationPortHttps);
-  litiumUserName = await askQuestion('Enter Litium username', litiumUserName);
-  litiumPassword = await askQuestion('Enter Litium password', litiumPassword);
+  sqlServer = await Prompts.askQuestion('Enter SQL Server address', sqlServer);
+  sqlServerPort = await Prompts.askQuestion('Enter SQL Server port', sqlServerPort);
+  sqlServerUsername = await Prompts.askQuestion('Enter SQL Server username', sqlServerUsername);
+  sqlServerPassword = await Prompts.askQuestion('Enter SQL Server password', sqlServerPassword);
+  applicationUrl = await Prompts.askQuestion('Enter application URL', `${projectName.toLowerCase()}.localtest.me`);
+  applicationPort = await Prompts.askQuestion('Enter application port (Http)', applicationPort);
+  applicationPortHttps = await Prompts.askQuestion('Enter secure application port (Https)', applicationPortHttps);
+  litiumUserName = await Prompts.askQuestion('Enter Litium username', litiumUserName);
+  litiumPassword = await Prompts.askQuestion('Enter Litium password', litiumPassword);
 
   // Ask for project type selection
   const options = ['MVC', 'Headless'];
-  projectType = await askSelection('Select project type to set up:', options);
+  projectType = await Prompts.askSelection('Select project type to set up:', options);
   projectType = projectType.toLowerCase();
 };
 
@@ -507,7 +544,7 @@ const isDotnetToolInstalled = (commandName, directory) => {
 
     return false;
   } catch (error) {
-    err(`${chalk.bgRed}Failed to list dotnet tools: ${error.message}`);
+    err(`Failed to list dotnet tools: ${error.message}`);
     process.exit(1);
   }
 };
