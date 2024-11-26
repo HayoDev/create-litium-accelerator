@@ -104,17 +104,17 @@ if (isWindows) {
 
 // Centralized color definitions
 const colors = {
-  primaryBg: '#0d47a1', // Dark blue
+  primaryBg: '#8600f4', // Dark blue
   primaryText: '#ffffff', // White
-  secondaryBg: '#1976d2', // Medium blue
+  secondaryBg: '#c711ff', // Medium blue
   secondaryText: '#ffffff', // White
-  errorBg: '#d32f2f', // Red
+  errorBg: '#e40505', // Red
   errorText: '#ffffff', // White
   warningBg: '#ffa000', // Orange
   warningText: '#000000', // Black
   infoBg: '#64b5f6', // Light blue
   infoText: '#000000', // Black
-  successBg: '#388e3c', // Green
+  successBg: '#3ff448', // Green
   successText: '#ffffff', // White
   highlightText: '#ffeb3b', // Yellow
   importantBg: '#ffeb3b', // Yellow
@@ -127,11 +127,11 @@ const inf = (message) => {
 };
 
 const warn = (message) => {
-  console.log(chalk.bgHex(colors.warningBg).hex(colors.warningText)(message));
+  console.log(`WARN ${chalk.bgHex(colors.warningBg).hex(colors.warningText)(message)}`);
 };
 
 const err = (message) => {
-  console.log(chalk.bgHex(colors.errorBg).hex(colors.errorText)(message));
+  console.log(`${chalk.bgRed.black('ERROR')} ${chalk.bgHex(colors.errorBg).hex(colors.errorText).underline(message)}`);
 };
 
 const pro = (message) => {
@@ -287,10 +287,12 @@ const runCommand = (command, args = [], cwd = null, options = {}) => {
 const checkNodeVersion = (expectedVersion) => {
   const currentVersion = process.version.replace('v', '');
   if (!currentVersion.startsWith(expectedVersion)) {
-    err(`Node.js version ${expectedVersion} is required. Current version: ${currentVersion}`);
+    err(`${chalk.bgRed(`Node.js version ${expectedVersion} is required. Current version: ${currentVersion}`)}`);
     process.exit(1);
   }
 };
+
+checkNodeVersion(nodeVersion);
 
 const waitForSQLConnection = async () => {
   pro('Waiting for connection to the SQL server (in Docker container)...');
@@ -725,7 +727,7 @@ if (!fs.existsSync(projectDir)) {
 }
 
 checkDependencies(dependencies);
-checkNodeVersion(nodeVersion);
+
 
 pro('Setting up the Litium environment...');
 
