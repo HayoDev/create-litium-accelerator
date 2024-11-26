@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.12](https://github.com/HayoDev/create-litium-accelerator/compare/v0.0.11...v0.0.12) (2024-11-26)
+
+
+### Features
+
+* add projectName to projectPath ([f620040](https://github.com/HayoDev/create-litium-accelerator/commit/f6200404a25d9b172fcd0ea54ec0f85337e93ffc))
+
 ### [0.0.11](https://github.com/HayoDev/create-litium-accelerator/compare/v0.0.10...v0.0.11) (2024-11-26)
 
 
