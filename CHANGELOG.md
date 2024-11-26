@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.11](https://github.com/HayoDev/create-litium-accelerator/compare/v0.0.10...v0.0.11) (2024-11-26)
+
+
+### Features
+
+* :package: chalk ([38f76c5](https://github.com/HayoDev/create-litium-accelerator/commit/38f76c5c1d96d74c6a28a05ec13309922d6c08f0))
+* add readme ([6e56ad0](https://github.com/HayoDev/create-litium-accelerator/commit/6e56ad0684ad4de09800730b04b0691e424004fa))
+* color handling ([3bf698d](https://github.com/HayoDev/create-litium-accelerator/commit/3bf698d8da4a8195c96cd6de56776f42c5aab921))
+* node check && :nail_polish: ([bc6a20f](https://github.com/HayoDev/create-litium-accelerator/commit/bc6a20fd3328edcec2176f6b351ce0b99b7b275d))
+* update to esm ([c5d4203](https://github.com/HayoDev/create-litium-accelerator/commit/c5d4203546beb8b39e9e69c1b48f43c5dd14af5f))
+
 ### [0.0.10](https://github.com/HayoDev/create-litium-accelerator/compare/v0.0.9...v0.0.10) (2024-11-25)
 
 
