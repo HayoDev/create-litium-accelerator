@@ -73,7 +73,7 @@ Before installing the Litium Accelerator, you need to:
 Run the following command in your terminal:
 
 ```bash
-npx create-litium-accelerator
+npx @hayodev/create-litium-accelerator
 ```
 
 This command will fetch the latest version of `create-litium-accelerator` from NPM and execute it.
@@ -131,34 +131,6 @@ https://litiumaccelerator.localtest.me:5001/litium
 ```
 
 Log in using the Litium admin credentials you provided during the setup.
-
-## Configuration
-
-### Docker SQL Server Container
-
-- Ensure the SQL Server Docker container is running and accessible.
-- The default container name is `sqlserver-1`, but you can specify a different name during setup.
-
-### Docker Compose File
-
-Use the provided `docker-compose.yaml` to set up shared services required by Litium.
-
-- **dnsresolver**: Resolves `localtest.me` domains to your local host.
-- **elasticsearch**: Search engine required by Litium.
-- **kibana**: Management portal for Elasticsearch.
-- **synonymserver**: Provides synonyms for Elasticsearch.
-- **redis**: Distributed cache, event broker, and distributed lock.
-- **sqlserver**: Microsoft SQL Server.
-- **mailhog**: Development SMTP server.
-
-### Certificates
-
-- For local development, you may need to trust self-signed certificates or disable TLS verification.
-- For **Headless** projects, set `NODE_TLS_REJECT_UNAUTHORIZED="0"` in your environment variables.
-
-### Updating the Database Connection String
-
-- If you need to modify the database connection string, ensure it matches your SQL Server configuration in `appsettings.Development.json`.
 
 ## Troubleshooting
 
