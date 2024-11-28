@@ -1,16 +1,13 @@
 <h1 align="center">
-	<br>
-	<br>
-	<img width="320" src="media/hayo.svg" alt="HAYO">
-	<br>
-	<br>
-	<br>
+	<img width="420" src="media/hayo.svg" alt="HAYO">
 </h1>
 
 # Create Litium Accelerator
 
-[![npm version](https://img.shields.io/npm/v/create-litium-accelerator.svg)](https://www.npmjs.com/package/create-litium-accelerator)
+[![npm version](https://img.shields.io/npm/v/@hayodev/create-litium-accelerator.svg)](https://www.npmjs.com/package/@hayodev/create-litium-accelerator)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![npm dependents](https://badgen.net/npm/dependents/@hayodev/create-litium-accelerator)](https://www.npmjs.com/package/chalk?activeTab=dependents)
+[![Downloads](https://badgen.net/npm/dt/chalk)](https://www.npmjs.com/package/@hayodev/create-litium-accelerator)
 
 ## Introduction
 
