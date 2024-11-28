@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.17](https://github.com/HayoDev/create-litium-accelerator/compare/v0.0.16...v0.0.17) (2024-11-28)
+
+
+### Bug Fixes
+
+* added -C flag for Sqlcmd ([5165d2d](https://github.com/HayoDev/create-litium-accelerator/commit/5165d2d24484a1fa41ad179eab2501dc3140f198))
+
 ### [0.0.16](https://github.com/HayoDev/create-litium-accelerator/compare/v0.0.15...v0.0.16) (2024-11-28)
 
 
