@@ -1,6 +1,11 @@
-# HAYO
-![HAYO](./images/hayo.svg)
-
+<h1 align="center">
+	<br>
+	<br>
+	<img width="320" src="media/hayo.svg" alt="HAYO">
+	<br>
+	<br>
+	<br>
+</h1>
 
 # Create Litium Accelerator
 
