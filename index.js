@@ -204,7 +204,7 @@ const getSqlCmdPath = (containerName) => {
 const checkDatabaseExists = (database) => {
   const sqlCmdPath = getSqlCmdPath(sqlServerDockerName);
   const sqlQuery = `SET NOCOUNT ON; SELECT name FROM sys.databases WHERE name = N'${database}';`;
-  const command = `docker exec ${sqlServerDockerName} "${sqlCmdPath}" -S ${sqlServer},${sqlServerDockerContainerPort} -U ${sqlServerUsername} -P ${sqlServerPassword} -Q "${sqlQuery}" -h -1 -W`;
+  const command = `docker exec ${sqlServerDockerName} "${sqlCmdPath}" -S ${sqlServer},${sqlServerDockerContainerPort} -U ${sqlServerUsername} -P ${sqlServerPassword} -Q "${sqlQuery}" -h -1 -W -C`;
   try {
     const result = execSync(command, { encoding: 'utf8', shell: true }).trim();
     return result === database;
