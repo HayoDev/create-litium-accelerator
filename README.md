@@ -1,3 +1,7 @@
+# HAYO
+![HAYO](./images/hayo.svg)
+
+
 # Create Litium Accelerator
 
 [![npm version](https://img.shields.io/npm/v/create-litium-accelerator.svg)](https://www.npmjs.com/package/create-litium-accelerator)
