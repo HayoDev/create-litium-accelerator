@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.16](https://github.com/HayoDev/create-litium-accelerator/compare/v0.0.15...v0.0.16) (2024-11-28)
+
+
+### Features
+
+* [icon] ([2ee41d1](https://github.com/HayoDev/create-litium-accelerator/commit/2ee41d1c647e724b773b229893caad4dce8497ef))
+
+
+### Bug Fixes
+
+* :zap: typo MD ([66c6732](https://github.com/HayoDev/create-litium-accelerator/commit/66c673229c154b7fe0961593d0f2c406e8271697))
+* md ([c792817](https://github.com/HayoDev/create-litium-accelerator/commit/c792817d089436a7fc6333eb2075e93518e77cee))
+
 ### [0.0.15](https://github.com/HayoDev/create-litium-accelerator/compare/v0.0.14...v0.0.15) (2024-11-27)
 
 
